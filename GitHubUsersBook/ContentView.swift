@@ -8,14 +8,33 @@
 import SwiftUI
 
 struct ContentView: View {
+    
+    @ObservedObject var fetch = FetchUsers()
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        if (fetch.items.count == 0) {
+            ProgressView().onAppear() {
+                fetch.loadData()
+            }
         }
-        .padding()
+        else {
+            List(fetch.items, id: \.login) { user in
+                Link(destination: URL(string: user.html_url)!) {
+                    HStack(alignment: .top) {
+                        AsyncImage(url: URL(string: user.avatar_url)) { image in
+                            image.image?.resizable()
+                                .frame(width: 50, height: 50)
+                        }
+                        VStack(alignment: .leading) {
+                            Text(user.login)
+                            Text("\(user.url)")
+                                .font(.system(size: 11))
+                                .foregroundStyle(Color.gray)
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
